@@ -22,14 +22,21 @@
 
 require "lfs"
 
+function isDir(path)
+    return lfs.attributes(path,"mode") == "directory"
+end
+
+function isGit(root)
+    local path = root .. "/.git"
+    return isDir(path)
+end
+
 local path = os.getenv("HOME") .. "/dev/git"
-for file in lfs.dir(path) do
+for dir in lfs.dir(path) do
 	-- ignore "this" and "parent" dirs
-	if file ~= "." and file ~= ".." then
-		local d = path .. "/" .. file
-		local attr = lfs.attributes(d)
-		-- assert (type(attr) == "table")
-		if attr.mode == "directory" then
+	if dir ~= "." and dir ~= ".." then
+        local d = path .. "/" .. dir
+		if isGit(d) then
 			-- process dir
 			lfs.chdir(d)
 			xcode = os.execute("git status | grep 'nothing to commit' 2>&1 >/dev/null")
