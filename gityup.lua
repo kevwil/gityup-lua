@@ -33,26 +33,26 @@ end
 
 local path = os.getenv("HOME") .. "/dev/git"
 for dir in lfs.dir(path) do
-	-- ignore "this" and "parent" dirs
-	if dir ~= "." and dir ~= ".." then
-        local d = path .. "/" .. dir
-		if isGit(d) then
-			-- process dir
-			lfs.chdir(d)
-			xcode = os.execute("git status | grep 'nothing to commit' 2>&1 >/dev/null")
-			if xcode ~= 0 then
-				print("local changes detected, skipping " .. d)
-			else
-				xcode = os.execute("git config branch.master.remote 2>&1 >/dev/null")
-				if xcode ~= 0 then
-					print("no remote to pull from, skipping " .. d)
-				else
-					print("#### pulling " .. d .. " ####")
-					lfs.chdir(d)
-					os.execute("git pull")
-					print("")
-				end
-			end
-		end
-	end
+  -- ignore "this" and "parent" dirs
+  if dir ~= "." and dir ~= ".." then
+    local d = path .. "/" .. dir
+    if isGit(d) then
+      -- process dir
+      lfs.chdir(d)
+      xcode = os.execute("git status | grep 'nothing to commit' 2>&1 >/dev/null")
+      if xcode ~= 0 then
+        print("local changes detected, skipping " .. d)
+      else
+        xcode = os.execute("git config branch.master.remote 2>&1 >/dev/null")
+        if xcode ~= 0 then
+          print("no remote to pull from, skipping " .. d)
+        else
+          print("#### pulling " .. d .. " ####")
+          lfs.chdir(d)
+          os.execute("git pull")
+          print("")
+        end
+      end
+    end
+  end
 end
