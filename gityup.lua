@@ -1,17 +1,17 @@
 #!/usr/bin/env lua
 
 -- Copyright (c) 2011 Kevin D Williams
--- 
+--
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal
 -- in the Software without restriction, including without limitation the rights
 -- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 -- copies of the Software, and to permit persons to whom the Software is
 -- furnished to do so, subject to the following conditions:
--- 
+--
 -- The above copyright notice and this permission notice shall be included in
 -- all copies or substantial portions of the Software.
--- 
+--
 -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 -- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 -- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
-require "lfs"
+local lfs = require("lfs")
 
 function isDir(path)
     return lfs.attributes(path,"mode") == "directory"
@@ -31,7 +31,7 @@ function isGit(root)
     return isDir(path)
 end
 
-local path = os.getenv("HOME") .. "/dev/git"
+local path = arg[1]
 for dir in lfs.dir(path) do
   -- ignore "this" and "parent" dirs
   if dir ~= "." and dir ~= ".." then
@@ -39,17 +39,17 @@ for dir in lfs.dir(path) do
     if isGit(d) then
       -- process dir
       lfs.chdir(d)
-      xcode = os.execute("git status | grep 'nothing to commit' 2>&1 >/dev/null")
-      if xcode ~= 0 then
+      local xcode = os.execute("git status | grep 'nothing to commit' 2>&1 >/dev/null")
+      if xcode == nil then
         print("local changes detected, skipping " .. d)
       else
-        xcode = os.execute("git config branch.master.remote 2>&1 >/dev/null")
-        if xcode ~= 0 then
+        local xcode = os.execute("git config branch.master.remote 2>&1 >/dev/null")
+        if xcode == nil then
           print("no remote to pull from, skipping " .. d)
         else
           print("#### pulling " .. d .. " ####")
-          lfs.chdir(d)
-          os.execute("git pull")
+          -- lfs.chdir(d)
+          os.execute("git smart-pull")
           print("")
         end
       end
