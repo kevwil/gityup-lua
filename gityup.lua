@@ -43,14 +43,21 @@ for dir in lfs.dir(path) do
       if xcode == nil then
         print("local changes detected, skipping " .. d)
       else
-        local xcode = os.execute("git config branch.master.remote 2>&1 >/dev/null")
-        if xcode == nil then
-          print("no remote to pull from, skipping " .. d)
+        local handle = io.popen("git branch --show-current")
+        local branchname = handle:read()
+        handle:close()
+        if #branchname == 0 then
+          print("#### detached HEAD state, skipping ####")
         else
-          print("#### pulling " .. d .. " ####")
-          -- lfs.chdir(d)
-          os.execute("git smart-pull")
-          print("")
+          local xcode = os.execute("git config branch." .. branchname .. ".remote 2>&1 >/dev/null")
+          if xcode == nil then
+            print("no remote to pull from, skipping " .. d)
+          else
+            print("#### pulling " .. d .. " ####")
+            -- lfs.chdir(d)
+            os.execute("git smart-pull && git remote update origin --prune")
+            print("")
+          end
         end
       end
     end
